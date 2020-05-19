@@ -1,78 +1,73 @@
+
 <html>
 
-<head>
-  <!--Load the AJAX API-->
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <style>
     .Grade-Charts {
-      text-align: center;
-      font-family: Arial, Helvetica, sans-serif;
-
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  
     }
   </style>
-</head>
-
-<body>
-  <!--Div that will hold the pie chart-->
-  <div class="Grade-Charts">
-    <h1>Students Grades</h1>
-    <div id="col_chart_html_tooltip"></div>
-    <div id="x"></div>
-
-
-
-  </div>
-
-
-
-  <script type="text/javascript">
-    google.charts.load('current', { 'packages': ['corechart'] });
-    google.charts.setOnLoadCallback(drawChart);
-
-    function drawChart() {
-      var dataTable = new google.visualization.DataTable();
-      dataTable.addColumn('string', 'Grade');
-      dataTable.addColumn('number', 'Sales');
-      // A column for custom tooltip content
-
-      axios.get('converted.json')
-        .then(res => {
-          let grades = res.data;
-          console.log(grades);
-          
-          for (let i = 0; i < grades.length; i++) {
-            let Grade = Number(grades[i].Grade)
-            dataTable.addRows([
-              [
-                [ grades[i].Name, Grade, grades[i].Exam, + '' ]
-              ]
-            ])
-
-          }
-
-        })
-
-      dataTable.addColumn({ type: 'string', role: 'tooltip' });
-
-
-      var chart = new google.charts.Bar(document.getElementById('top_x_div'));
-      // Convert the Classic options to Material options.
-      chart.draw(data, google.charts.Bar.convertOptions(options));
-    };
-
-
-
-  </script>
-
-
-
-
-  }
-
-
-
-  </script>
-</body>
-
-</html>
+  </head>
+  
+  <body>
+    <!--Div that will hold the pie chart-->
+    <div class="Grade-Charts">
+      <h1>Students Grades</h1>
+      <div id="col_chart_html_tooltip"></div>
+      <div id="x"></div>
+  
+  
+  
+    </div>
+  
+  
+  
+    <script type="text/javascript">
+      google.charts.load('current', { 'packages': ['corechart'] });
+      google.charts.setOnLoadCallback(drawChart);
+  
+      function drawChart() {
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Grade');
+        dataTable.addColumn('number', 'Sales');
+        // A column for custom tooltip content
+        dataTable.addColumn({ type: 'string', role: 'tooltip' });
+  
+  
+        axios.get('converted.json')
+          .then(res => {
+            for (let i = 0; i < res.data.length; i++) {
+              let Grade = Number(res.data[i].Grade);
+              console.log(res.data[i].Name);
+              
+              dataTable.addRows(
+                [
+                [res.data[i].Name, Grade, res.data[i].Name+'-'+ res.data[i].Exam]
+              ]);
+  
+            }
+  
+            console.log(res.data);
+            var options = {
+              tooltip: { isHtml: true },
+              legend: 'none'
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
+            chart.draw(dataTable, options);
+          })
+  
+  
+  
+      }
+  
+  
+  
+    </script>
+  </body>
+  
+  </html>
