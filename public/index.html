@@ -1,82 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--Load the AJAX API-->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <title>Document</title>
+  <style>
+    .Grade-Charts {
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+
+    }
+  </style>
 </head>
 
 <body>
+  <!--Div that will hold the pie chart-->
+  <div class="Grade-Charts">
+    <h1>Students Grades</h1>
+    <div id="col_chart_html_tooltip"></div>
+    <div id="x"></div>
 
 
 
-  <div id="top_x_div"></div>
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  </div>
+
+
+
   <script type="text/javascript">
-    google.charts.load('current', { 'packages': ['bar'] });
-    google.charts.setOnLoadCallback(drawStuff);
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart);
 
+    function drawChart() {
+      var dataTable = new google.visualization.DataTable();
+      dataTable.addColumn('string', 'Grade');
+      dataTable.addColumn('number', 'Sales');
+      // A column for custom tooltip content
 
+      axios.get('converted.json')
+        .then(res => {
+          let grades = res.data;
+          console.log(grades);
+          
+          for (let i = 0; i < grades.length; i++) {
+            let Grade = Number(grades[i].Grade)
+            dataTable.addRows([
+              [
+                [ grades[i].Name, Grade, grades[i].Exam, + '' ]
+              ]
+            ])
 
-    function drawStuff() {
-      var data = new google.visualization.arrayToDataTable([
-        ['Move', 'Percentage'],
-        ["King's pawn (e4)", 44],
-        ["Queen's pawn (d4)", 31],
-        ["Knight to King 3 (Nf3)", 50],
-        ["Queen's bishop pawn (c4)", 10],
-        ['Other', 3]
-      ]);
-
-      var options = {
-        width: 900,
-        legend: { position: 'none' },
-        chart: {
-          title: 'Chess opening moves',
-          subtitle: 'popularity by percentage'
-        },
-        axes: {
-          x: {
-            0: { side: 'top', label: 'White to move' } // Top x-axis.
           }
-        },
-        bar: { groupWidth: "100%" }
-      };
+
+        })
+
+      dataTable.addColumn({ type: 'string', role: 'tooltip' });
+
 
       var chart = new google.charts.Bar(document.getElementById('top_x_div'));
       // Convert the Classic options to Material options.
       chart.draw(data, google.charts.Bar.convertOptions(options));
     };
 
-    getData();
 
-    function getData() {
-      axios.get('converted.json')
-        .then(res => {
-          let grades = res.data;
-          let strGrades = JSON.stringify(grades);
-          let arr = [];
-          for (let i = 0; i < strGrades.length; i++) {
-            strGrades.slice(1,2);
-            arr.push(strGrades[i])
-            
-          }
-          console.log(arr);
-          
-        })
-
-    }
 
   </script>
 
 
 
 
+  }
 
 
 
+  </script>
 </body>
 
 </html>
