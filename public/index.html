@@ -1,73 +1,154 @@
-
 <html>
 
-  <head>
-    <!--Load the AJAX API-->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<head>
+  <!--Load the AJAX API-->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <style>
     .Grade-Charts {
-  text-align: center;
-  font-family: Arial, Helvetica, sans-serif;
-  
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+
     }
   </style>
-  </head>
-  
-  <body>
-    <!--Div that will hold the pie chart-->
-    <div class="Grade-Charts">
-      <h1>Students Grades</h1>
-      <div id="col_chart_html_tooltip"></div>
-      <div id="x"></div>
-  
-  
-  
-    </div>
-  
-  
-  
-    <script type="text/javascript">
-      google.charts.load('current', { 'packages': ['corechart'] });
-      google.charts.setOnLoadCallback(drawChart);
-  
-      function drawChart() {
-        var dataTable = new google.visualization.DataTable();
-        dataTable.addColumn('string', 'Grade');
-        dataTable.addColumn('number', 'Sales');
-        // A column for custom tooltip content
-        dataTable.addColumn({ type: 'string', role: 'tooltip' });
-  
-  
-        axios.get('converted.json')
-          .then(res => {
-            for (let i = 0; i < res.data.length; i++) {
-              let Grade = Number(res.data[i].Grade);
-              console.log(res.data[i].Name);
-              
-              dataTable.addRows(
-                [
-                [res.data[i].Name, Grade, res.data[i].Name+'-'+ res.data[i].Exam]
+</head>
+
+<body>
+  <!--Div that will hold the pie chart-->
+  <div class="Grade-Charts">
+    <h1>Students Grades</h1>
+    <div id="col_chart_html_tooltip"></div>
+    <button id="myBtnA">Exam A</button>
+    <button id="myBtnB">Exam B</button>
+    <button id="myBtnC">Exam C</button>
+  </div>
+
+
+
+  <script type="text/javascript">
+    google.charts.load('current', { 'packages': ['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+    let AExam = []
+    let BExam = []
+    let CExam = []
+
+    function drawChart() {
+      var dataTable = new google.visualization.DataTable();
+
+      dataTable.addColumn('string', 'Grade');
+      dataTable.addColumn('number', 'Sales');
+      // A column for custom tooltip content
+      dataTable.addColumn({ type: 'string', role: 'tooltip' });
+      axios.get('converted.json')
+        .then(res => {
+          for (let i = 0; i < res.data.length; i++) {
+            let Grade = Number(res.data[i].Grade);
+            console.log(res.data[i].Name);
+            dataTable.addRows(
+              [
+                [res.data[i].Name, Grade, + '-' + res.data[i].Exam]
               ]);
-  
+
+
+
+          }
+          AExam = res.data.filter(data => {
+
+            if (data.Exam === 'A') {
+              return data
             }
-  
-            console.log(res.data);
-            var options = {
-              tooltip: { isHtml: true },
-              legend: 'none'
-            };
-            var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
-            chart.draw(dataTable, options);
           })
-  
-  
-  
+          BExam = res.data.filter(data => {
+
+            if (data.Exam === 'B') {
+              return data
+            }
+          })
+          CExam = res.data.filter(data => {
+
+            if (data.Exam === 'C') {
+              return data
+            }
+          })
+
+          console.log(AExam, "AExam");
+          console.log(BExam, "BExam");
+          console.log(CExam, "CExam");
+
+          var options = {
+            tooltip: { isHtml: true },
+            legend: 'none'
+          };
+          var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
+          chart.draw(dataTable, options);
+        })
+
+
+      document.getElementById("myBtnA").addEventListener("click", displayChartA);
+      document.getElementById("myBtnB").addEventListener("click", displayChartB);
+      // document.getElementById("myBtnC").addEventListener("click", displayChartc);
+      function displayChartA() {
+        // document.getElementById('col_chart_html_tooltip').innerHTML = ""; 
+
+
+        for (let i = 0; i < AExam.length; i++) {
+
+          let Grade = Number(AExam[i].Grade);
+          dataTable.addRows(
+            [
+              [AExam[i].Name, Grade, AExam[i].Exam]
+            ]);
+              console.log(Grade);
+        }
+
+          console.log(AExam);
+
+
+
+        var options = {
+          tooltip: { isHtml: true },
+          legend: 'none'
+        };
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
+        chart.draw(dataTable, options);
       }
-  
-  
-  
-    </script>
-  </body>
-  
-  </html>
+
+
+      function displayChartB() {
+        // document.getElementById('col_chart_html_tooltip').innerHTML = ""; 
+
+
+        for (let i = 0; i < BExam.length; i++) {
+
+          let Grade = Number(BExam[i].Grade);
+          dataTable.addRows(
+            [
+              [BExam[i].Name, Grade, BExam[i].Exam]
+            ]);
+
+            console.log(Grade);
+
+        }
+
+          console.log(BExam);
+
+
+
+        var options = {
+          tooltip: { isHtml: true },
+          legend: 'none'
+        };
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
+        chart.draw(dataTable, options);
+      }
+
+    }
+
+    
+
+
+    
+  </script>
+  </head>
