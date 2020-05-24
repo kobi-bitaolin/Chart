@@ -18,9 +18,10 @@
   <div class="Grade-Charts">
     <h1>Students Grades</h1>
     <div id="col_chart_html_tooltip"></div>
-    <button id="myBtn">CliCk</button>
-
-
+    <button id="AExam">Exam A </button>
+    <button id="BExam">Exam B </button>
+    <button id="CExam">Exam C </button>
+    <button id="AllExams"> All Exams </button>
   </div>
 
 
@@ -28,9 +29,11 @@
   <script type="text/javascript">
     google.charts.load('current', { 'packages': ['corechart'] });
     google.charts.setOnLoadCallback(drawChart);
-    let AExam = []
-    let BExam = []
-    let CExam = []
+    let AExam = [];
+    let BExam = [];
+    let CExam = [];
+    let AllExams = [];
+    let arrayLebgth = 0;
 
     function drawChart() {
       var dataTable = new google.visualization.DataTable();
@@ -74,32 +77,46 @@
           console.log(AExam, "AExam");
           console.log(BExam, "BExam");
           console.log(CExam, "CExam");
-          
+
           var options = {
             tooltip: { isHtml: true },
             legend: 'none'
           };
           var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
           chart.draw(dataTable, options);
+
+
+          arrayLebgth = res.data.length;
+          AllExams = res.data
         })
 
 
-      document.getElementById("myBtn").addEventListener("click", displayDate);
-      function displayDate() {
-        document.getElementById('col_chart_html_tooltip').innerHTML =""
-        for (let i = 0; i < AExam.length; i++) {
 
-          let Grade = Number(AExam[i].Grade);
+
+      document.getElementById("AExam").addEventListener("click", function () { displayDate(AExam) });
+      document.getElementById("BExam").addEventListener("click", function () { displayDate(BExam) });
+      document.getElementById("CExam").addEventListener("click", function () { displayDate(CExam) });
+      document.getElementById("AllExams").addEventListener("click", function () { displayDate(AllExams) });
+      function displayDate(ExamtypeArray) {
+        // dataTable.hg =[];
+        console.log(arrayLebgth, 'arrayLebgth');
+
+        dataTable.removeRows(0, arrayLebgth);
+        console.log(dataTable);
+
+        for (let i = 0; i < ExamtypeArray.length; i++) {
+          console.log(ExamtypeArray[i].Exam, "Exam");
+
+          let Grade = Number(ExamtypeArray[i].Grade);
           dataTable.addRows(
             [
-              [AExam[i].Name, Grade, AExam[i].Exam]
+              [ExamtypeArray[i].Name, Grade, ExamtypeArray[i].Name + '-' + ExamtypeArray[i].Exam]
             ]);
         }
 
         var options = {
           tooltip: { isHtml: true },
-          legend: 'none'
-        };
+          legend: 'none'        };
 
         var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
         chart.draw(dataTable, options);
