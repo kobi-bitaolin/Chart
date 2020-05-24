@@ -33,28 +33,10 @@
     let BExam = [];
     let CExam = [];
     let AllExams = [];
-    let arrayLebgth = 0;
 
     function drawChart() {
-      var dataTable = new google.visualization.DataTable();
-
-      dataTable.addColumn('string', 'Grade');
-      dataTable.addColumn('number', 'Sales');
-      // A column for custom tooltip content
-      dataTable.addColumn({ type: 'string', role: 'tooltip' });
       axios.get('converted.json')
         .then(res => {
-          for (let i = 0; i < res.data.length; i++) {
-            let Grade = Number(res.data[i].Grade);
-            console.log(res.data[i].Name);
-            dataTable.addRows(
-              [
-                [res.data[i].Name, Grade, res.data[i].Name + '-' + res.data[i].Exam]
-              ]);
-
-
-
-          }
           AExam = res.data.filter(data => {
 
             if (data.Exam === 'A') {
@@ -77,17 +59,8 @@
           console.log(AExam, "AExam");
           console.log(BExam, "BExam");
           console.log(CExam, "CExam");
-
-          var options = {
-            tooltip: { isHtml: true },
-            legend: 'none'
-          };
-          var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
-          chart.draw(dataTable, options);
-
-
-          arrayLebgth = res.data.length;
-          AllExams = res.data
+          AllExams = res.data 
+          displayDate(AllExams)
         })
 
 
@@ -98,11 +71,12 @@
       document.getElementById("CExam").addEventListener("click", function () { displayDate(CExam) });
       document.getElementById("AllExams").addEventListener("click", function () { displayDate(AllExams) });
       function displayDate(ExamtypeArray) {
-        // dataTable.hg =[];
-        console.log(arrayLebgth, 'arrayLebgth');
+      var dataTable = new google.visualization.DataTable();
+      dataTable.addColumn('string', 'Grade');
+      dataTable.addColumn('number', 'Sales');
+      // A column for custom tooltip content
+      dataTable.addColumn({ type: 'string', role: 'tooltip' });
 
-        dataTable.removeRows(0, arrayLebgth);
-        console.log(dataTable);
 
         for (let i = 0; i < ExamtypeArray.length; i++) {
           console.log(ExamtypeArray[i].Exam, "Exam");
@@ -110,7 +84,7 @@
           let Grade = Number(ExamtypeArray[i].Grade);
           dataTable.addRows(
             [
-              [ExamtypeArray[i].Name, Grade, ExamtypeArray[i].Name + '-' + ExamtypeArray[i].Exam]
+              [ExamtypeArray[i].Name, Grade, ExamtypeArray[i].Name + '-' + Grade + '-' + ExamtypeArray[i].Exam]
             ]);
         }
 
