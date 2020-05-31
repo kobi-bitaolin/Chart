@@ -10,6 +10,10 @@
       font-family: Arial, Helvetica, sans-serif;
 
     }
+
+    .col_chart_html_tooltip {
+      border: solid black 1px;
+    }
   </style>
 </head>
 
@@ -17,11 +21,12 @@
   <!--Div that will hold the pie chart-->
   <div class="Grade-Charts">
     <h1>Students Grades</h1>
-    <div id="col_chart_html_tooltip"></div>
     <button id="AExam">Exam A </button>
     <button id="BExam">Exam B </button>
     <button id="CExam">Exam C </button>
     <button id="AllExams"> All Exams </button>
+    <div id="col_chart_html_tooltip" style="width: 100%;"></div><br>
+
   </div>
 
 
@@ -34,72 +39,170 @@
     let CExam = [];
     let AllExams = [];
 
+
+
+    function csvJSON(csv) {
+
+      let lines = csv.split("\r\n");
+      console.log(lines);
+
+      let result = [];
+      let keys = lines[0].split(",");
+      for (let i = 1; i < lines.length - 1; i++) {
+        let obj = {};
+        let currentline = lines[i].split(",");
+        for (let j = 0; j < keys.length; j++) {
+          obj[keys[j]] = currentline[j];
+        }
+        result.push(obj);
+      }
+      console.log(result);
+
+
+      AExam = result.filter(data => {
+
+        if (data.Exam === 'A') {
+          return data
+        }
+      })
+      BExam = result.filter(data => {
+
+        if (data.Exam === 'B') {
+          return data
+        }
+      })
+      CExam = result.filter(data => {
+
+        if (data.Exam === 'C') {
+          return data
+        }
+      })
+      AllExams = result;
+      SinglStudent(CExam)
+      return result;
+
+    }
     function drawChart() {
-      axios.get('converted.json')
+      axios.get('/grades.csv')
         .then(res => {
-          AExam = res.data.filter(data => {
+          csvJSON(res.data)
+          displayExam(AllExams)
+        });
+      document.getElementById("AExam").addEventListener("click", function () { displayExam(AExam) });
+      document.getElementById("BExam").addEventListener("click", function () { displayExam(BExam) });
+      document.getElementById("CExam").addEventListener("click", function () { displayExam(CExam) });
+      document.getElementById("AllExams").addEventListener("click", function () { displayExam(AllExams) });
+    }
 
-            if (data.Exam === 'A') {
-              return data
-            }
-          })
-          BExam = res.data.filter(data => {
-
-            if (data.Exam === 'B') {
-              return data
-            }
-          })
-          CExam = res.data.filter(data => {
-
-            if (data.Exam === 'C') {
-              return data
-            }
-          })
-
-          console.log(AExam, "AExam");
-          console.log(BExam, "BExam");
-          console.log(CExam, "CExam");
-          AllExams = res.data 
-          displayDate(AllExams)
-        })
-
-
-
-
-      document.getElementById("AExam").addEventListener("click", function () { displayDate(AExam) });
-      document.getElementById("BExam").addEventListener("click", function () { displayDate(BExam) });
-      document.getElementById("CExam").addEventListener("click", function () { displayDate(CExam) });
-      document.getElementById("AllExams").addEventListener("click", function () { displayDate(AllExams) });
-      function displayDate(ExamtypeArray) {
+    function displayExam(ExamtypeArray) {
+      let sumAllGrades = 0;
+      let avg = 0;
       var dataTable = new google.visualization.DataTable();
-      dataTable.addColumn('string', 'Grade');
-      dataTable.addColumn('number', 'Sales');
+      dataTable.addColumn('string', 'Name');
+      dataTable.addColumn('number', 'Grade');
       // A column for custom tooltip content
       dataTable.addColumn({ type: 'string', role: 'tooltip' });
+      dataTable.addColumn({ type: 'string', role: "style" });
+      dataTable.addColumn('number', 'Average');
 
 
-        for (let i = 0; i < ExamtypeArray.length; i++) {
-          console.log(ExamtypeArray[i].Exam, "Exam");
-
-          let Grade = Number(ExamtypeArray[i].Grade);
-          dataTable.addRows(
-            [
-              [ExamtypeArray[i].Name, Grade, ExamtypeArray[i].Name + '-' + Grade + '-' + ExamtypeArray[i].Exam]
-            ]);
-        }
-
-        var options = {
-          tooltip: { isHtml: true },
-          legend: 'none'        };
-
-        var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
-        chart.draw(dataTable, options);
+      for (let i = 0; i < ExamtypeArray.length; i++) {
+        let Grade = Number(ExamtypeArray[i].Grade);
+        sumAllGrades += Grade;
       }
 
+      avg = sumAllGrades / ExamtypeArray.length;
+      console.log(avg);
+
+
+      console.log(ExamtypeArray.Grade, "Min");
+
+   
+      console.log(ExamtypeArray);
+      for (let i = 0; i < ExamtypeArray.length; i++) {
+        console.log(ExamtypeArray[i].Name);
+
+        let Grade = Number(ExamtypeArray[i].Grade);
+        console.log(sumAllGrades, "sumAllGrades");
+
+        dataTable.addRows(
+          [
+            [ExamtypeArray[i].Name, Grade, ExamtypeArray[i].Name + '-' + Grade + '-' + ExamtypeArray[i].Exam, Grade > avg ? '#3366cc' : '#bf0d0d',avg]
+          ]);
+      }
+
+      console.log(dataTable);
+      
+      var options = {
+        width: 1800,
+        height: 800,
+        title:ExamtypeArray.length > 14 ? "All Exams" :'Exam' + '-'+ ExamtypeArray[0].Exam ,
+        tooltip: { isHtml: false },
+        bar: { groupWidth: "70%" },
+        hAxis: {
+          textPosition: 'out',
+          title: 'Student Name'
+        },
+        series: {1: {type: 'line', color: 'red'}},
+        lineWidth: 5,
+        vAxis: {
+          title: 'Grade',
+          maxValue: 100
+        },
+      };
+    
+
+      var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
+      chart.draw(dataTable, options);
     }
 
 
 
+
+function SinglStudent(arry) {
+  console.log(arry);
+  
+
+  // var dataTable = new google.visualization.DataTable();
+  //     dataTable.addColumn('string', 'Name');
+  //     dataTable.addColumn('number', 'Grade');
+  //     // A column for custom tooltip content
+  //     dataTable.addColumn({ type: 'string', role: 'tooltip' });
+  //     dataTable.addColumn({ type: 'string', role: "style" });
+  //     dataTable.addColumn('number', 'Average');
+
+//  let allExOfStudents = arry.filter(StudentName=>{
+
+//    if (StudentName === "Alice") {
+//      return StudentName
+//    }
+
+  // })
+
+
+
+
+     
+
+      // var options = {
+      //   width: 1800,
+      //   height: 800,
+      //   tooltip: { isHtml: false },
+      //   bar: { groupWidth: "70%" },
+      //   hAxis: {
+      //     textPosition: 'out',
+      //     title: 'Exam'
+      //   },
+      //   lineWidth: 5,
+      //   vAxis: {
+      //     title: 'Grade',
+      //     maxValue: 100
+      //   },
+      // };
+
+      // var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
+      // chart.draw(dataTable, options);
+}
   </script>
 </body>
 
