@@ -102,8 +102,9 @@
       dataTable.addColumn('number', 'Grade');
       // A column for custom tooltip content
       dataTable.addColumn({ type: 'string', role: 'tooltip' });
-      dataTable.addColumn({ type: 'string', role: "style" });
-      dataTable.addColumn('number', 'Average');
+      dataTable.addColumn({ type: 'string', role: "style" }); /// add color to culomn
+
+      dataTable.addColumn('number', 'Average');// add line to the chart
 
 
       for (let i = 0; i < ExamtypeArray.length; i++) {
@@ -111,14 +112,8 @@
         sumAllGrades += Grade;
       }
 
-      avg = sumAllGrades / ExamtypeArray.length;
-      console.log(avg);
+      avg = sumAllGrades / ExamtypeArray.length; /// avrage Grade
 
-
-      console.log(ExamtypeArray.Grade, "Min");
-
-   
-      console.log(ExamtypeArray);
       for (let i = 0; i < ExamtypeArray.length; i++) {
         console.log(ExamtypeArray[i].Name);
 
@@ -129,22 +124,23 @@
           [
             [ExamtypeArray[i].Name, Grade, ExamtypeArray[i].Name + '-' + Grade + '-' + ExamtypeArray[i].Exam, Grade > avg ? '#3366cc' : '#bf0d0d',avg]
           ]);
-      }
-
-      console.log(dataTable);
-      
+      }      
       var options = {
+        //style chart
         width: 1800,
         height: 800,
-        title:ExamtypeArray.length > 14 ? "All Exams" :'Exam' + '-'+ ExamtypeArray[0].Exam ,
+        title:ExamtypeArray.length > 14 ? "All Exams" :'Exam' + '-'+ ExamtypeArray[0].Exam , /// chart title
         tooltip: { isHtml: false },
         bar: { groupWidth: "70%" },
+        //H title
         hAxis: {
           textPosition: 'out',
           title: 'Student Name'
         },
+        //// Add line to the chart
         series: {1: {type: 'line', color: 'red'}},
         lineWidth: 5,
+        /// V title
         vAxis: {
           title: 'Grade',
           maxValue: 100
@@ -159,50 +155,6 @@
 
 
 
-function SinglStudent(arry) {
-  console.log(arry);
-  
-
-  // var dataTable = new google.visualization.DataTable();
-  //     dataTable.addColumn('string', 'Name');
-  //     dataTable.addColumn('number', 'Grade');
-  //     // A column for custom tooltip content
-  //     dataTable.addColumn({ type: 'string', role: 'tooltip' });
-  //     dataTable.addColumn({ type: 'string', role: "style" });
-  //     dataTable.addColumn('number', 'Average');
-
-//  let allExOfStudents = arry.filter(StudentName=>{
-
-//    if (StudentName === "Alice") {
-//      return StudentName
-//    }
-
-  // })
-
-
-
-
-     
-
-      // var options = {
-      //   width: 1800,
-      //   height: 800,
-      //   tooltip: { isHtml: false },
-      //   bar: { groupWidth: "70%" },
-      //   hAxis: {
-      //     textPosition: 'out',
-      //     title: 'Exam'
-      //   },
-      //   lineWidth: 5,
-      //   vAxis: {
-      //     title: 'Grade',
-      //     maxValue: 100
-      //   },
-      // };
-
-      // var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
-      // chart.draw(dataTable, options);
-}
   </script>
 </body>
 
