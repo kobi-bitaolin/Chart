@@ -1,160 +1,237 @@
 <html>
-
-<head>
-  <!--Load the AJAX API-->
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <style>
-    .Grade-Charts {
-      text-align: center;
-      font-family: Arial, Helvetica, sans-serif;
-
-    }
-
-    .col_chart_html_tooltip {
-      border: solid black 1px;
-    }
-  </style>
-</head>
-
-<body>
-  <!--Div that will hold the pie chart-->
-  <div class="Grade-Charts">
-    <h1>Students Grades</h1>
-    <button id="AExam">Exam A </button>
-    <button id="BExam">Exam B </button>
-    <button id="CExam">Exam C </button>
-    <button id="AllExams"> All Exams </button>
-    <div id="col_chart_html_tooltip" style="width: 100%;"></div><br>
-
-  </div>
-
-
-
-  <script type="text/javascript">
-    google.charts.load('current', { 'packages': ['corechart'] });
-    google.charts.setOnLoadCallback(drawChart);
-    let AExam = [];
-    let BExam = [];
-    let CExam = [];
-    let AllExams = [];
-
-
-
-    function csvJSON(csv) {
-
-      let lines = csv.split("\r\n");
-      console.log(lines);
-
-      let result = [];
-      let keys = lines[0].split(",");
-      for (let i = 1; i < lines.length - 1; i++) {
-        let obj = {};
-        let currentline = lines[i].split(",");
-        for (let j = 0; j < keys.length; j++) {
-          obj[keys[j]] = currentline[j];
-        }
-        result.push(obj);
+  <head>
+    <!--Load the AJAX API-->
+    <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+      .Grade-Charts {
+        text-align: center;
+        font-family: Arial, Helvetica, sans-serif;
       }
-      console.log(result);
 
+      .col_chart_html_tooltip {
+        border: solid black 1px;
+      }
+    </style>
+  </head>
 
-      AExam = result.filter(data => {
+  <body>
+    <!--Div that will hold the pie chart-->
+    <div class="Grade-Charts">
+      <h1>Students Grades</h1>
+      <button id="AExam">Exam A</button>
+      <button id="BExam">Exam B</button>
+      <button id="CExam">Exam C</button>
+      <button id="AllExams">All Exams</button>
+      <select name="Students" id="Students"> </select>
+      <div id="col_chart_html_tooltip" style="width: 100%;"></div>
+      <br />
+      <div id="Single_Student" style="width: 100%;"></div>
+      <br />
+    </div>
 
-        if (data.Exam === 'A') {
-          return data
+    <script type="text/javascript">
+      google.charts.load("current", { packages: ["corechart"] });
+      google.charts.setOnLoadCallback(drawChart);
+      let AExam = [];
+      let BExam = [];
+      let CExam = [];
+      let AllExams = [];
+      let select = document.getElementById("Students");
+
+      document.getElementById("Students").addEventListener("click", function() {
+        StudentExams(AllExams, select.options[select.selectedIndex].value);
+      });
+
+      function csvJSON(csv) {
+        let lines = csv.split("\r\n");
+        console.log(lines);
+
+        let result = [];
+        let keys = lines[0].split(",");
+        for (let i = 1; i < lines.length - 1; i++) {
+          let obj = {};
+          let currentline = lines[i].split(",");
+          for (let j = 0; j < keys.length; j++) {
+            obj[keys[j]] = currentline[j];
+          }
+          result.push(obj);
         }
-      })
-      BExam = result.filter(data => {
+        console.log(result);
 
-        if (data.Exam === 'B') {
-          return data
-        }
-      })
-      CExam = result.filter(data => {
-
-        if (data.Exam === 'C') {
-          return data
-        }
-      })
-      AllExams = result;
-      return result;
-
-    }
-    function drawChart() {
-      axios.get('/grades.csv')
-        .then(res => {
-          csvJSON(res.data)
-          displayExam(AllExams)
+        AExam = result.filter(data => {
+          if (data.Exam === "A") {
+            return data;
+          }
         });
-      document.getElementById("AExam").addEventListener("click", function () { displayExam(AExam) });
-      document.getElementById("BExam").addEventListener("click", function () { displayExam(BExam) });
-      document.getElementById("CExam").addEventListener("click", function () { displayExam(CExam) });
-      document.getElementById("AllExams").addEventListener("click", function () { displayExam(AllExams) });
-    }
+        BExam = result.filter(data => {
+          if (data.Exam === "B") {
+            return data;
+          }
+        });
+        CExam = result.filter(data => {
+          if (data.Exam === "C") {
+            return data;
+          }
+        });
+        AllExams = result;
 
-    function displayExam(ExamtypeArray) {
-      let sumAllGrades = 0;
-      let avg = 0;
-      var dataTable = new google.visualization.DataTable();
-      dataTable.addColumn('string', 'Name');
-      dataTable.addColumn('number', 'Grade');
-      // A column for custom tooltip content
-      dataTable.addColumn({ type: 'string', role: 'tooltip' });
-      dataTable.addColumn({ type: 'string', role: "style" }); /// add color to culomn
+        for (let i = 0; i < AExam.length; i++) {
+          let opt = document.createElement("option");
+          opt.value = AExam[i].Name;
+          opt.innerHTML = AExam[i].Name;
 
-      dataTable.addColumn('number', 'Average');// add line to the chart
-
-
-      for (let i = 0; i < ExamtypeArray.length; i++) {
-        let Grade = Number(ExamtypeArray[i].Grade);
-        sumAllGrades += Grade;
+          select.appendChild(opt);
+        }
+        StudentExams(AllExams);
+        return result;
+      }
+      function drawChart() {
+        axios.get("/grades.csv").then(res => {
+          csvJSON(res.data);
+          displayExam(AllExams);
+        });
+        document.getElementById("AExam").addEventListener("click", function() {
+          displayExam(AExam);
+        });
+        document.getElementById("BExam").addEventListener("click", function() {
+          displayExam(BExam);
+        });
+        document.getElementById("CExam").addEventListener("click", function() {
+          displayExam(CExam);
+        });
+        document
+          .getElementById("AllExams")
+          .addEventListener("click", function() {
+            displayExam(AllExams);
+          });
       }
 
-      avg = sumAllGrades / ExamtypeArray.length; /// avrage Grade
+      function displayExam(ExamtypeArray) {
+        let sumAllGrades = 0;
+        let avg = 0;
+        let HighestGrade = 0;
 
-      for (let i = 0; i < ExamtypeArray.length; i++) {
-        console.log(ExamtypeArray[i].Name);
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn("string", "Name");
+        dataTable.addColumn("number", "Grade");
+        // A column for custom tooltip content
+        dataTable.addColumn({ type: "string", role: "tooltip" });
+        dataTable.addColumn({ type: "string", role: "style" }); /// add color to culomn
 
-        let Grade = Number(ExamtypeArray[i].Grade);
-        console.log(sumAllGrades, "sumAllGrades");
+        dataTable.addColumn("number", "Average"); // add line to the chart
 
-        dataTable.addRows(
-          [
-            [ExamtypeArray[i].Name, Grade, ExamtypeArray[i].Name + '-' + Grade + '-' + ExamtypeArray[i].Exam, Grade > avg ? '#3366cc' : '#bf0d0d',avg]
+        for (let i = 0; i < ExamtypeArray.length; i++) {
+          let Grade = Number(ExamtypeArray[i].Grade);
+          if (Grade > HighestGrade) {
+            HighestGrade = Grade;
+          }
+          sumAllGrades += Grade;
+        }
+        console.log(HighestGrade, "highestGrade grade");
+        console.log(avg, "avg grade");
+
+        avg = sumAllGrades / ExamtypeArray.length; /// avrage Grade
+
+        for (let i = 0; i < ExamtypeArray.length; i++) {
+          let Grade = Number(ExamtypeArray[i].Grade);
+          dataTable.addRows([
+            [
+              ExamtypeArray[i].Name,
+              Grade,
+              Grade + "-" + ExamtypeArray[i].Exam,
+              HighestGrade > Grade ? "#3366cc" : "#bf0d0d",
+              avg //line
+            ]
           ]);
-      }      
-      var options = {
-        //style chart
-        width: 1800,
-        height: 800,
-        title:ExamtypeArray.length > 14 ? "All Exams" :'Exam' + '-'+ ExamtypeArray[0].Exam , /// chart title
-        tooltip: { isHtml: false },
-        bar: { groupWidth: "70%" },
-        //H title
-        hAxis: {
-          textPosition: 'out',
-          title: 'Student Name'
-        },
-        //// Add line to the chart
-        series: {1: {type: 'line', color: 'red'}},
-        lineWidth: 5,
-        /// V title
-        vAxis: {
-          title: 'Grade',
-          maxValue: 100
-        },
-      };
-    
+        }
 
-      var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
-      chart.draw(dataTable, options);
-    }
+        var options = {
+          //style chart
+          width: 1600,
+          height: 800,
+          title:
+            ExamtypeArray.length > AExam.length
+              ? "All Exams"
+              : "Exam" + "-" + ExamtypeArray[0].Exam, /// chart title
+          tooltip: { isHtml: false },
+          bar: { groupWidth: "70%" },
+          //H title
+          hAxis: {
+            textPosition: "out",
+            title: "Student Name"
+          },
+          //// Add line to the chart
+          series: { 1: { type: "line", color: "red" } },
+          lineWidth: 5,
+          /// V title
+          vAxis: {
+            title: "Grade",
+            maxValue: 100
+          }
+        };
+        var chart = new google.visualization.ColumnChart(
+          document.getElementById("col_chart_html_tooltip")
+        );
+        chart.draw(dataTable, options);
+      }
+
+      // single Students Exams
+      function StudentExams(AllExams, StudentsName) {
+
+        console.log(StudentsName ,"AllExams");
+        
+        if (StudentsName) {
+          var dataTable = new google.visualization.DataTable();
+          dataTable.addColumn("string", "Exam");
+          dataTable.addColumn("number", "Grade");
+          let StudentExams = AllExams.filter(data => {
+            if (data.Name === StudentsName) {
+              return data;
+            }
+          });
+
+          for (let i = 0; i < StudentExams.length; i++) {
+            let Grade = Number(StudentExams[i].Grade);
+            dataTable.addRows([[StudentExams[i].Exam, Grade]]);
+          }
+          console.log(StudentExams);
+          var options = {
+            //style chart
+            width: 1550,
+            height: 400,
+            title: StudentsName + "-" + "Exam",
+            tooltip: { isHtml: false },
+            bar: { groupWidth: "70%" },
+            //H title
+            hAxis: {
+              textPosition: "out",
+              title: "Exam"
+            },
+            //// Add line to the chart
+            series: { 0: { type: "line", color: "blue" } },
+            lineWidth: 5,
+            /// V title
+            vAxis: {
+              title: "Grade",
+              maxValue: 100
+            }
+          };
+
+          var chart = new google.visualization.ColumnChart(
+            document.getElementById("Single_Student")
+          );
+          chart.draw(dataTable, options);
 
 
-
-
-  </script>
-</body>
-
+        } else {
+          return 
+          
+        }
+      }
+    </script>
+  </body>
 </html>
