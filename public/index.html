@@ -8,7 +8,6 @@
     .Grade-Charts {
       text-align: center;
       font-family: Arial, Helvetica, sans-serif;
-
     }
   </style>
 </head>
@@ -16,8 +15,9 @@
 <body>
   <!--Div that will hold the pie chart-->
   <div class="Grade-Charts">
-    <h1>Students Grades</h1>
+    <!-- <h1></h1> -->
     <div id="col_chart_html_tooltip"></div>
+    <br />
     <button id="AExam">Exam A </button>
     <button id="BExam">Exam B </button>
     <button id="CExam">Exam C </button>
@@ -33,104 +33,107 @@
     let BExam = [];
     let CExam = [];
     let AllExams = [];
-    let arrayLebgth = 0;
+    let exam;
 
     function drawChart() {
-      var dataTable = new google.visualization.DataTable();
-      dataTable.addColumn('string', 'Grade');
-      dataTable.addColumn('number', 'Sales');
-      // A column for custom tooltip content
-      dataTable.addColumn({ type: 'string', role: 'tooltip' });
-      axios.get('converted.json')
+      axios.get('/grades.csv')
         .then(res => {
-          for (let i = 0; i < res.data.length; i++) {
-            let Grade = Number(res.data[i].Grade);
-            console.log(res.data[i].Name);
-            dataTable.addRows(
-              [
-                [res.data[i].Name, Grade, + '-' + res.data[i].Exam]
-              ]);
-          }
-          // filter the response data into three array`s by each exam. 
-          AExam = res.data.filter(data => {
+
+          AllExams = csvJSON(res.data);
+          AExam = AllExams.filter(data => {
 
             if (data.Exam === 'A') {
-              return data
+              return data;
             }
           })
-          BExam = res.data.filter(data => {
+          BExam = AllExams.filter(data => {
 
             if (data.Exam === 'B') {
-              return data
+              return data;
             }
           })
-          CExam = res.data.filter(data => {
+          CExam = AllExams.filter(data => {
 
             if (data.Exam === 'C') {
-              return data
+              return data;
             }
           })
 
-          console.log(AExam, "AExam");
-          console.log(BExam, "BExam");
-          console.log(CExam, "CExam");
+          displayExam(AllExams);
 
-          var options = {
-            tooltip: { isHtml: true },
-            legend: 'none'
-          };
-          var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
-          chart.draw(dataTable, options);
+        });
+
+      // function that convert a csv file to an Object
+
+      function csvJSON(csv) {
+
+        let lines = csv.split("\r\n");
+        // console.log(lines);
+        let result = [];
+        let keys = lines[0].split(",");
+        // console.log(keys);
+        for (let i = 0; i < lines.length; i++) {
+
+          let obj = {};
+          let currentValue = lines[i].split(",");
+          console.log(currentValue);
+          for (let j = 0; j < keys.length; j++) {
+            obj[keys[j]] = currentValue[j];
+            console.log(currentValue[j]);
+          }
+          result.push(obj);
+        }
+
+        return result.slice(1);
+      };
 
 
-          arrayLebgth = res.data.length;
-          AllExams = res.data
-        })
+      document.getElementById("AExam").addEventListener("click", function () { displayExam(AExam) });
+      document.getElementById("BExam").addEventListener("click", function () { displayExam(BExam) });
+      document.getElementById("CExam").addEventListener("click", function () { displayExam(CExam) });
+      document.getElementById("AllExams").addEventListener("click", function () { displayExam(AllExams) });
 
+      function displayExam(ExamtypeArray) {
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Grade');
+        dataTable.addColumn('number', 'Sales');
+        // A column for custom tooltip content
+        dataTable.addColumn({ type: 'string', role: 'tooltip' });
 
-
-
-      document.getElementById("AExam").addEventListener("click", function () { displayDate(AExam) });
-      document.getElementById("BExam").addEventListener("click", function () { displayDate(BExam) });
-      document.getElementById("CExam").addEventListener("click", function () { displayDate(CExam) });
-      document.getElementById("AllExams").addEventListener("click", function () { displayDate(AllExams) });
-
-      function displayDate(ExamtypeArray) {
-        // dataTable.hg =[];
-        console.log(arrayLebgth, 'arrayLebgth');
-
-        dataTable.removeRows(0, arrayLebgth);
-        // console.log(dataTable);
 
         for (let i = 0; i < ExamtypeArray.length; i++) {
-          console.log(ExamtypeArray[i].Exam, "Exam");
-
           let Grade = Number(ExamtypeArray[i].Grade);
+          exam = Grade;
+
           dataTable.addRows(
             [
-              [ExamtypeArray[i].Name, Grade, ExamtypeArray[i].Name + '-' + ExamtypeArray[i].Exam]
+              [ExamtypeArray[i].Name, Grade, ExamtypeArray[i].Name + '-' + Grade + '-' + ExamtypeArray[i].Exam]
             ]);
 
         }
+        console.log(exam);
+
 
         console.log(ExamtypeArray);
 
-
-
         var options = {
-          tooltip: { isHtml: true },
-          legend: 'none'
+
+          title: 'Students Grades',
+          colors: ['#e0440e'],
+          is3D: true
         };
 
-        
-        function selectHandler(e) {
-          alert('A table row was selected');
+        function selectHandler(grade) {
+            console.log(grade);
         }
+
         
         var chart = new google.visualization.ColumnChart(document.getElementById('col_chart_html_tooltip'));
-        google.visualization.events.addListener(dataTable, 'select', selectHandler);
+        google.visualization.events.addListener(chart, 'select', function () {
+          selectHandler(exam)
+        });
         chart.draw(dataTable, options);
-      }
+      };
     }
 
 
